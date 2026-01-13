@@ -1,5 +1,6 @@
 # Environment variables
 .env
+arcane_dump/
 
 # Python
 __pycache__/
@@ -64,3 +65,16 @@ coverage.xml
 
 # Windows
 Thumbs.db
+/cache/CObjects.cache
+/cache/CZone.cache
+/cache/Dungeon.cache
+/cache/Mesh.cache
+/cache/Motion.cache
+/cache/Palette.cache
+/cache/Render.cache
+/cache/Skeleton.cache
+/cache/Sound.cache
+/cache/TerrainAlpha.cache
+/cache/Textures.cache
+/cache/Tile.cache
+/cache/Visual.cache

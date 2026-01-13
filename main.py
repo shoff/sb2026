@@ -8,15 +8,19 @@ A tool for viewing and exporting Shadowbane game assets with skeletal animation 
 import sys
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QMessageBox
 
-# Add parent directory to path for arcane imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure repo root is importable (for `arcane`, `ui`, etc.)
+REPO_ROOT = Path(__file__).resolve().parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from ui.main_window import MainWindow
-from ui.asset_browser import AssetBrowserWidget
+from ui.asset_catalog import AssetCatalogWidget
 from ui.opengl_viewport import OpenGLViewport
 from ui.animation_timeline import AnimationTimelineWidget
 from assets.asset_manager import AssetManager
+from assets.asset_catalog import AssembledAsset
 
 
 class ShadowbaneViewer:
@@ -34,8 +38,18 @@ class ShadowbaneViewer:
         self._set_dark_theme()
 
         # Initialize asset manager
-        arcane_dump_path = Path(__file__).parent.parent / "arcane_dump"
-        self.asset_manager = AssetManager(str(arcane_dump_path))
+        arcane_dump_path = REPO_ROOT / "arcane_dump"
+        try:
+            self.asset_manager = AssetManager(str(arcane_dump_path))
+        except Exception as e:
+            QMessageBox.critical(
+                None,
+                "Startup Error",
+                "Asset bootstrap failed.\n\n"
+                f"arcane_dump={arcane_dump_path}\n\n"
+                f"error={e}",
+            )
+            raise
 
         # Create main window
         self.main_window = MainWindow()
@@ -43,9 +57,9 @@ class ShadowbaneViewer:
         # Set asset manager reference
         self.main_window.set_asset_manager(self.asset_manager)
 
-        # Create asset browser
-        self.asset_browser = AssetBrowserWidget(self.asset_manager)
-        self.main_window.set_asset_browser(self.asset_browser)
+        # Create assembled-asset catalog browser
+        self.asset_catalog = AssetCatalogWidget(self.asset_manager)
+        self.main_window.set_asset_browser(self.asset_catalog)
 
         # Create OpenGL viewport
         self.viewport = OpenGLViewport(self.asset_manager)
@@ -60,6 +74,20 @@ class ShadowbaneViewer:
 
         # Show window
         self.main_window.show()
+
+        # Basic startup signal: confirm we can see assets
+        try:
+            cobject_count = len(self.asset_manager.list_assets("cobject"))
+            render_count = len(self.asset_manager.list_assets("render"))
+            mesh_count = len(self.asset_manager.list_assets("mesh"))
+            tex_count = len(self.asset_manager.list_assets("texture"))
+            self.main_window.show_status_message(
+                f"index ok|cobjects={cobject_count}|renders={render_count}|meshes={mesh_count}|textures={tex_count}",
+                5000,
+            )
+        except Exception as e:
+            self.main_window.show_status_message(f"index error|err={e}", 5000)
+
         self.main_window.show_status_message(
             f"Loaded assets from: {arcane_dump_path}",
             5000
@@ -67,8 +95,8 @@ class ShadowbaneViewer:
 
     def _connect_signals(self):
         """Connect signals between components."""
-        # Asset browser selection -> main window
-        self.asset_browser.asset_selected.connect(self._on_asset_selected)
+        # Asset catalog selection -> viewport
+        self.asset_catalog.assembled_asset_selected.connect(self._on_assembled_asset_selected)
 
         # Viewport FPS -> status bar
         self.viewport.fps_updated.connect(lambda fps:
@@ -182,6 +210,11 @@ class ShadowbaneViewer:
                 f"Selected {asset_type}: {asset_id}",
                 3000
             )
+
+    def _on_assembled_asset_selected(self, asset: AssembledAsset) -> None:
+        self.viewport.load_assembled_asset(asset)
+        self.main_window.show_status_message(f"asset loaded|id={asset.asset_id}|parts={len(asset.parts)}", 3000)
+        self.main_window.enable_export(True)
 
     def _on_play_animation(self):
         """Handle play button click."""

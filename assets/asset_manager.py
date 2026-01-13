@@ -13,7 +13,7 @@ import sys
 from pathlib import Path as PathLib
 
 # Add parent directory to path for arcane imports
-parent_dir = PathLib(__file__).parent.parent.parent
+parent_dir = PathLib(__file__).parent.parent
 if str(parent_dir) not in sys.path:
     sys.path.insert(0, str(parent_dir))
 
@@ -44,6 +44,11 @@ class AssetManager:
             arcane_dump_path: Path to arcane_dump/ directory
         """
         self.arcane_dump_path = Path(arcane_dump_path)
+        self._validate_arcane_dump_layout()
+
+        # Disk index (id -> file path). Prevents slow recursive scans on-demand.
+        self._json_index: Dict[str, Dict[int, Path]] = {}
+        self._texture_index: Dict[int, Path] = {}
 
         # Asset caches
         self.meshes: Dict[int, ArcMesh] = {}
@@ -66,6 +71,77 @@ class AssetManager:
             'cobject': self.arcane_dump_path / 'COBJECTS',
         }
 
+        self._build_disk_index()
+
+    def _build_disk_index(self) -> None:
+        """
+        Build an index of asset_id -> file path.
+
+        Notes:
+        - Some dumps (notably `COBJECTS/`) are nested by category (STATIC/ITEM/…).
+        - Indexing avoids repeated directory scans and makes startup state explicit.
+        """
+        def index_json(asset_type: str, recursive: bool) -> Dict[int, Path]:
+            asset_dir = self.asset_paths[asset_type]
+            if not asset_dir.exists():
+                return {}
+            pattern_iter = asset_dir.rglob("*.json") if recursive else asset_dir.glob("*.json")
+            out: Dict[int, Path] = {}
+            for p in pattern_iter:
+                try:
+                    out[int(p.stem)] = p
+                except ValueError:
+                    continue
+            return out
+
+        # JSON-backed asset types
+        self._json_index["mesh"] = index_json("mesh", recursive=False)
+        self._json_index["skeleton"] = index_json("skeleton", recursive=False)
+        self._json_index["motion"] = index_json("motion", recursive=False)
+        self._json_index["render"] = index_json("render", recursive=False)
+        self._json_index["cobject"] = index_json("cobject", recursive=True)
+
+        # Texture images (some dumps use .tga without JSON metadata)
+        tex_dir = self.asset_paths["texture"]
+        for ext in (".jpg", ".tga", ".png"):
+            for p in tex_dir.glob(f"*{ext}"):
+                try:
+                    self._texture_index[int(p.stem)] = p
+                except ValueError:
+                    continue
+
+    def _get_json_path(self, asset_type: str, asset_id: int) -> Optional[Path]:
+        by_id = self._json_index.get(asset_type, {})
+        return by_id.get(asset_id)
+
+    def get_source_path(self, asset_type: str, asset_id: int) -> Optional[str]:
+        """
+        Return the resolved on-disk path for an asset ID.
+
+        Useful for debugging and for higher-level catalog/index layers.
+        """
+        if asset_type == "texture":
+            p = self._texture_index.get(asset_id)
+            return str(p) if p else None
+        p = self._get_json_path(asset_type, asset_id)
+        return str(p) if p else None
+
+    def _validate_arcane_dump_layout(self) -> None:
+        """
+        Fail fast if the arcane_dump directory is missing or malformed.
+
+        This prevents a silent "empty UI" experience when paths are wrong.
+        """
+        if not self.arcane_dump_path.exists():
+            raise FileNotFoundError(f"arcane_dump not found|path={self.arcane_dump_path}")
+
+        required_dirs = ("MESH", "TEXTURE", "SKELETON", "MOTION", "RENDER", "COBJECTS")
+        missing = [d for d in required_dirs if not (self.arcane_dump_path / d).exists()]
+        if missing:
+            raise FileNotFoundError(
+                f"arcane_dump missing dirs|path={self.arcane_dump_path}|missing={','.join(missing)}"
+            )
+
     def load_mesh(self, asset_id: int) -> Optional[ArcMesh]:
         """
         Load mesh from JSON file.
@@ -79,9 +155,9 @@ class AssetManager:
         if asset_id in self.meshes:
             return self.meshes[asset_id]
 
-        json_path = self.asset_paths['mesh'] / f"{asset_id}.json"
-        if not json_path.exists():
-            print(f"Mesh {asset_id} not found at {json_path}")
+        json_path = self._get_json_path("mesh", asset_id)
+        if not json_path:
+            print(f"Mesh missing|id={asset_id}")
             return None
 
         try:
@@ -109,7 +185,7 @@ class AssetManager:
         if asset_id in self.textures:
             return self.textures[asset_id]
 
-        # Try JSON file first
+        # Try JSON file first (not always present in dumps)
         json_path = self.asset_paths['texture'] / f"{asset_id}.json"
         if json_path.exists():
             try:
@@ -139,18 +215,24 @@ class AssetManager:
         if asset_id in self.texture_images:
             return self.texture_images[asset_id]
 
-        jpg_path = self.asset_paths['texture'] / f"{asset_id}.jpg"
-        if not jpg_path.exists():
-            print(f"Texture image {asset_id} not found at {jpg_path}")
+        tex_dir = self.asset_paths['texture']
+        candidate_paths = [
+            tex_dir / f"{asset_id}.jpg",
+            tex_dir / f"{asset_id}.tga",
+            tex_dir / f"{asset_id}.png",
+        ]
+        image_path = next((p for p in candidate_paths if p.exists()), None)
+        if image_path is None:
+            print(f"Texture image missing|id={asset_id}|dir={tex_dir}")
             return None
 
         try:
-            img = Image.open(jpg_path)
+            img = Image.open(image_path)
             # Note: Transformation (mirror/rotate) will be applied in TextureManager
             self.texture_images[asset_id] = img
             return img
         except Exception as e:
-            print(f"Error loading texture image {asset_id}: {e}")
+            print(f"Texture image load error|id={asset_id}|err={e}")
             return None
 
     def load_skeleton(self, asset_id: int) -> Optional[ArcSkeleton]:
@@ -166,9 +248,9 @@ class AssetManager:
         if asset_id in self.skeletons:
             return self.skeletons[asset_id]
 
-        json_path = self.asset_paths['skeleton'] / f"{asset_id}.json"
-        if not json_path.exists():
-            print(f"Skeleton {asset_id} not found at {json_path}")
+        json_path = self._get_json_path("skeleton", asset_id)
+        if not json_path:
+            print(f"Skeleton missing|id={asset_id}")
             return None
 
         try:
@@ -196,9 +278,9 @@ class AssetManager:
         if asset_id in self.motions:
             return self.motions[asset_id]
 
-        json_path = self.asset_paths['motion'] / f"{asset_id}.json"
-        if not json_path.exists():
-            print(f"Motion {asset_id} not found at {json_path}")
+        json_path = self._get_json_path("motion", asset_id)
+        if not json_path:
+            print(f"Motion missing|id={asset_id}")
             return None
 
         try:
@@ -226,9 +308,9 @@ class AssetManager:
         if asset_id in self.renders:
             return self.renders[asset_id]
 
-        json_path = self.asset_paths['render'] / f"{asset_id}.json"
-        if not json_path.exists():
-            print(f"Render {asset_id} not found at {json_path}")
+        json_path = self._get_json_path("render", asset_id)
+        if not json_path:
+            print(f"Render missing|id={asset_id}")
             return None
 
         try:
@@ -256,9 +338,9 @@ class AssetManager:
         if asset_id in self.cobjects:
             return self.cobjects[asset_id]
 
-        json_path = self.asset_paths['cobject'] / f"{asset_id}.json"
-        if not json_path.exists():
-            print(f"CObject {asset_id} not found at {json_path}")
+        json_path = self._get_json_path("cobject", asset_id)
+        if not json_path:
+            print(f"CObject missing|id={asset_id}")
             return None
 
         try:
@@ -286,19 +368,13 @@ class AssetManager:
         if asset_type not in self.asset_paths:
             return []
 
-        asset_dir = self.asset_paths[asset_type]
-        if not asset_dir.exists():
+        if asset_type == "texture":
+            return sorted(self._texture_index.keys())
+
+        by_id = self._json_index.get(asset_type)
+        if not by_id:
             return []
-
-        asset_ids = []
-        for json_file in asset_dir.glob('*.json'):
-            try:
-                asset_id = int(json_file.stem)
-                asset_ids.append(asset_id)
-            except ValueError:
-                continue
-
-        return sorted(asset_ids)
+        return sorted(by_id.keys())
 
     def get_texture_image_path(self, asset_id: int) -> Optional[str]:
         """
@@ -310,9 +386,9 @@ class AssetManager:
         Returns:
             Path to JPG file as string, or None if not found
         """
-        jpg_path = self.asset_paths['texture'] / f"{asset_id}.jpg"
-        if jpg_path.exists():
-            return str(jpg_path)
+        p = self._texture_index.get(asset_id)
+        if p is not None and p.exists():
+            return str(p)
         return None
 
     def clear_cache(self):

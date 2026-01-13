@@ -23,18 +23,24 @@ The application supports the following asset types loaded from `arcane_dump/` fo
 - **Skeletons** (104): Bone hierarchies with bind poses (up to 43 bones)
 - **Motions** (1,504): Animation frame data with position, rotation (quaternion), scale per bone
 - **Renders** (32,713): Render configuration data
-- **CObjects** (18): Composite object definitions
+- **CObjects** (10,332): Composite object definitions (assembled in-game assets), stored under `arcane_dump/COBJECTS/<CATEGORY>/`.
 
 ### Asset Loading
 
 - Assets are loaded on-demand via `AssetManager` class
+- `AssetManager` builds a disk index at startup to resolve `asset_id -> file path` (handles nested `COBJECTS/` categories)
 - Assets are cached in memory after first load
-- Asset paths are organized by type in `arcane_dump/` subdirectories
+- Texture images are loaded from `TEXTURE/` and may be `.tga` (current dump format) or `.jpg`
 - Dependencies: `arcane/` package for binary format parsers (ArcMesh, ArcSkeleton, ArcMotion, etc.)
 
 ### Asset Manager Location
 
 `assets/asset_manager.py` - Central registry for loading and caching all asset types.
+
+### Assembled Asset Catalog
+
+- The UI browses assembled assets (COBJECTS → RENDER → MESH/TEXTURE) via `assets/asset_catalog.py`
+- The catalog classifies assets primarily from `arcane_dump/COBJECTS/<CATEGORY>/` (e.g., `ITEM`, `STRUCTURE`, `RUNE`)
 
 ## Authentication and Authorization
 
@@ -169,7 +175,7 @@ Not applicable - this is a standalone desktop application with no external servi
 1. **GLTF Animation Export**: Full skeletal animation export to GLTF not yet implemented (static pose only)
 2. **Texture Embedding**: Textures are referenced by path in exports, not embedded
 3. **Batch Export**: Can only export one asset at a time
-4. **Mesh-Skeleton Association**: Manual selection required (no auto-loading from ArcRender/CObject metadata)
+4. **Skeleton Attachments**: CObject/Render attachment rules and hierarchy-driven transforms are not yet fully reconstructed from the original client
 5. **Max Bones**: Shader limited to 128 bones (sufficient for all Shadowbane skeletons)
 6. **OpenGL Version**: Requires OpenGL 3.3 Core Profile support
 

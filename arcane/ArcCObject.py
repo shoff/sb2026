@@ -43,6 +43,8 @@ class ArcCObject:
         "obj_skeleton",
         "obj_skeleton_id",
         "skeleton_id",
+        # Creature runes
+        "rune_skeleton",
     )
     _DECIMAL_ID = re.compile(r"^\d{4,8}$")
 
@@ -76,9 +78,10 @@ class ArcCObject:
         for k in self._RENDER_KEYS:
             v = data.get(k)
             if isinstance(v, int):
-                ids.add(v)
+                if v > 0:
+                    ids.add(v)
             elif isinstance(v, list):
-                ids.update(i for i in v if isinstance(i, int))
+                ids.update(i for i in v if isinstance(i, int) and i > 0)
         # Fallback heuristic: any key containing "render" and ending with _id
         for k, v in data.items():
             if (
@@ -86,7 +89,25 @@ class ArcCObject:
                 and k.lower().endswith("id")
                 and isinstance(v, int)
             ):
-                ids.add(v)
+                if v > 0:
+                    ids.add(v)
+
+        # Creature assembly: runes define per-body-part render IDs
+        rune_body_parts = data.get("rune_body_parts")
+        if isinstance(rune_body_parts, list):
+            for part in rune_body_parts:
+                if isinstance(part, dict):
+                    rid = part.get("body_part_render")
+                    if isinstance(rid, int) and rid > 0:
+                        ids.add(rid)
+
+        # Hair/beard render IDs (if present)
+        for k in ("rune_hair", "rune_beard"):
+            v = data.get(k)
+            if isinstance(v, list):
+                for rid in v:
+                    if isinstance(rid, int) and rid > 0:
+                        ids.add(rid)
         self.render_ids = sorted(ids)
 
         # Textures

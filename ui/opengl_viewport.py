@@ -7,7 +7,7 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QSurfaceFormat
 from OpenGL.GL import *
 import numpy as np
-from typing import Optional
+from typing import List, Optional
 
 from rendering.camera import Camera
 from rendering.shader_manager import ShaderManager
@@ -16,6 +16,7 @@ from rendering.texture_manager import TextureManager
 from animation.skeletal_animator import SkeletalAnimator
 from animation.animation_controller import AnimationController
 import time
+from assets.asset_catalog import AssembledAsset, MeshPart
 
 
 class OpenGLViewport(QOpenGLWidget):
@@ -51,6 +52,9 @@ class OpenGLViewport(QOpenGLWidget):
         # Current asset
         self.current_mesh_id: Optional[int] = None
         self.current_texture_id: Optional[int] = None
+        self.current_parts: List[MeshPart] = []
+        self._pending_assembled_asset: Optional[AssembledAsset] = None
+        self._pending_single_mesh: Optional[tuple[int, Optional[int], Optional[int], Optional[int]]] = None
 
         # Animation components
         self.skeletal_animator: Optional[SkeletalAnimator] = None
@@ -112,6 +116,16 @@ class OpenGLViewport(QOpenGLWidget):
 
         print("OpenGL initialized successfully")
 
+        # Apply any deferred loads that happened before GL init
+        if self._pending_assembled_asset is not None:
+            asset = self._pending_assembled_asset
+            self._pending_assembled_asset = None
+            self.load_assembled_asset(asset)
+        elif self._pending_single_mesh is not None:
+            mesh_id, texture_id, skeleton_id, motion_id = self._pending_single_mesh
+            self._pending_single_mesh = None
+            self.load_mesh(mesh_id, texture_id, skeleton_id, motion_id)
+
     def resizeGL(self, w: int, h: int):
         """Handle viewport resize."""
         glViewport(0, 0, w, h)
@@ -151,21 +165,38 @@ class OpenGLViewport(QOpenGLWidget):
         shader.set_vec3("uAmbientColor", np.array([0.3, 0.3, 0.3], dtype=np.float32))
         shader.set_vec3("uViewPos", self.camera.get_position())
 
-        # Render current mesh
-        if self.current_mesh_id is not None and self.mesh_renderer:
+        # Render assembled parts (preferred), else fallback to single-mesh mode
+        if self.current_parts and self.mesh_renderer:
+            bone_matrices = None
+            if has_animation and self.skeletal_animator:
+                bone_matrices = self.skeletal_animator.get_skinning_matrices()
+
+            for part in self.current_parts:
+                gpu_mesh = self.mesh_renderer.meshes.get(part.mesh_id)
+                if not gpu_mesh:
+                    continue
+
+                # Per-part model + normal matrix
+                shader.set_mat4("uModel", part.transform)
+                shader.set_mat4("uNormalMatrix", np.linalg.inv(part.transform).T)
+
+                tex_gl_id = None
+                if part.texture_id is not None:
+                    tex_gl_id = self.texture_manager.load_texture(part.texture_id)
+
+                self.mesh_renderer.render_mesh(gpu_mesh, shader, tex_gl_id, bone_matrices)
+
+        elif self.current_mesh_id is not None and self.mesh_renderer:
             gpu_mesh = self.mesh_renderer.meshes.get(self.current_mesh_id)
             if gpu_mesh:
-                # Get texture
                 texture_id = None
                 if self.current_texture_id is not None:
                     texture_id = self.texture_manager.load_texture(self.current_texture_id)
 
-                # Get bone matrices if animated
                 bone_matrices = None
                 if has_animation and self.skeletal_animator:
                     bone_matrices = self.skeletal_animator.get_skinning_matrices()
 
-                # Render
                 self.mesh_renderer.render_mesh(gpu_mesh, shader, texture_id, bone_matrices)
 
         # Render grid (optional)
@@ -189,21 +220,40 @@ class OpenGLViewport(QOpenGLWidget):
             skeleton_id: Optional skeleton asset ID
             motion_id: Optional motion/animation asset ID
         """
+        # If GL not ready yet, defer the request
+        if not self.mesh_renderer or not self.camera:
+            self._pending_single_mesh = (mesh_id, texture_id, skeleton_id, motion_id)
+            return
+
+        # Ensure the widget's GL context is current for any GL calls (VAO/VBO creation)
+        self.makeCurrent()
+
         # Load mesh from asset manager
         mesh = self.asset_manager.load_mesh(mesh_id)
         if not mesh:
             print(f"Failed to load mesh {mesh_id}")
+            self.doneCurrent()
             return
 
         # Upload to GPU
         gpu_mesh = self.mesh_renderer.upload_mesh(mesh, mesh_id)
         if not gpu_mesh:
             print(f"Failed to upload mesh {mesh_id}")
+            self.doneCurrent()
             return
 
         # Set as current
         self.current_mesh_id = mesh_id
         self.current_texture_id = texture_id
+        self.current_parts = [
+            MeshPart(
+                mesh_id=mesh_id,
+                texture_id=texture_id,
+                transform=np.identity(4, dtype=np.float32),
+                source_render_id=0,
+                target_bone=None,
+            )
+        ]
 
         # Load skeleton and animation if provided
         self.skeletal_animator = None
@@ -229,6 +279,84 @@ class OpenGLViewport(QOpenGLWidget):
         self.update()
 
         print(f"Loaded mesh {mesh_id}" + (f" with texture {texture_id}" if texture_id else ""))
+        self.doneCurrent()
+
+    def load_assembled_asset(self, asset: AssembledAsset) -> None:
+        """
+        Load and display an assembled multi-mesh asset.
+
+        Materials are simplified: first texture in each render is applied to all meshes in that render.
+        """
+        if not self.mesh_renderer or not self.camera:
+            # GL not initialized yet; defer
+            self._pending_assembled_asset = asset
+            return
+
+        # Ensure the widget's GL context is current for any GL calls (VAO/VBO creation)
+        self.makeCurrent()
+
+        self.current_mesh_id = None
+        self.current_texture_id = None
+        self.current_parts = asset.parts
+
+        # Disable animation for now (Task C will drive skeleton attachment rules)
+        self.skeletal_animator = None
+        self.animation_controller = None
+
+        # Upload all meshes referenced by the assembled asset
+        for part in self.current_parts:
+            mesh = self.asset_manager.load_mesh(part.mesh_id)
+            if not mesh:
+                continue
+            self.mesh_renderer.upload_mesh(mesh, part.mesh_id)
+
+        # Frame camera on combined transformed bounds
+        bounds_min, bounds_max = self._compute_scene_bounds(self.current_parts)
+        if bounds_min is not None and bounds_max is not None:
+            self.camera.frame_object(bounds_min, bounds_max)
+
+        self.update()
+        self.doneCurrent()
+
+    def _compute_scene_bounds(self, parts: List[MeshPart]) -> tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+        if not self.mesh_renderer:
+            return (None, None)
+
+        scene_min: Optional[np.ndarray] = None
+        scene_max: Optional[np.ndarray] = None
+
+        for part in parts:
+            gpu_mesh = self.mesh_renderer.meshes.get(part.mesh_id)
+            if not gpu_mesh:
+                continue
+
+            local_min = gpu_mesh.bounds_min
+            local_max = gpu_mesh.bounds_max
+            corners = np.array(
+                [
+                    [local_min[0], local_min[1], local_min[2], 1.0],
+                    [local_min[0], local_min[1], local_max[2], 1.0],
+                    [local_min[0], local_max[1], local_min[2], 1.0],
+                    [local_min[0], local_max[1], local_max[2], 1.0],
+                    [local_max[0], local_min[1], local_min[2], 1.0],
+                    [local_max[0], local_min[1], local_max[2], 1.0],
+                    [local_max[0], local_max[1], local_min[2], 1.0],
+                    [local_max[0], local_max[1], local_max[2], 1.0],
+                ],
+                dtype=np.float32,
+            )
+            world = (part.transform @ corners.T).T[:, :3]
+            wmin = np.min(world, axis=0)
+            wmax = np.max(world, axis=0)
+
+            if scene_min is None:
+                scene_min = wmin
+                scene_max = wmax
+            else:
+                scene_min = np.minimum(scene_min, wmin)
+                scene_max = np.maximum(scene_max, wmax)
+
+        return (scene_min, scene_max)
 
     def mousePressEvent(self, event):
         """Handle mouse press."""
