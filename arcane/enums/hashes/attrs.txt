@@ -1,0 +1,5 @@
+Strength
+Dexterity
+Constitution
+Intelligence
+Spirit

@@ -1,0 +1,13 @@
+BaseSky
+ChaosSky
+ChaosAltSky
+Dead
+DesertSky
+ElfSky
+Joe Cool
+NorthlandsSky
+Storm01
+Storm02
+Storm03
+SwampSky
+WastelandSky

@@ -1,0 +1,94 @@
+Animation
+Archery
+Athletics
+Axe Mastery
+Axe
+Bardsong
+Bargaining
+Beastcraft
+Benediction
+Blade Mastery
+Blade Weaving
+Block
+Bow
+Channeling
+Cloth
+Conditioning
+Crossbow
+Dagger Mastery
+Dagger
+Dodge
+Dueling
+Enchantment
+Endurance
+Flame Calling
+Focus
+Great Axe Mastery
+Great Hammer Mastery
+Great Sword Mastery
+Hammer Mastery
+Hammer
+Leadership
+Learning
+Liturgy
+Meditation
+Nature Lore
+None
+Opening
+Parry
+Pole Arm Mastery
+Pole Arm
+Resistance, Acid
+Resistance, Cold
+Resistance, Crushing
+Resistance, Disease
+Resistance, Earth
+Resistance, Fire
+Resistance, Holy
+Resistance, Lightning
+Resistance, Magic
+Resistance, Mental
+Resistance, Piercing
+Resistance, Poison
+Resistance, Slashing
+Resistance, Unholy
+Restoration
+Runecarving
+Running
+Shadowmastery
+Shapechanging
+Sorcery
+Spear Mastery
+Spear
+Staff Mastery
+Staff
+Stormcalling
+Subterfuge
+Summoning
+Sword Mastery
+Sword
+Thaumaturgy
+Theurgy
+Throwing
+Toughness
+Unarmed Combat Mastery
+Unarmed Combat
+Unknown
+Warding
+Warlockry
+Way of the Gaana
+Wear Armor, Heavy
+Wear Armor, Light
+Wear Armor, Medium
+Willpower
+Wizardry
+Corruption
+Abjuration
+Way of the Wolf
+Way of the Rat
+Way of the Bear
+Orthanatos
+Bloodcraft
+Exorcism
+Necromancy
+Sun Dancing

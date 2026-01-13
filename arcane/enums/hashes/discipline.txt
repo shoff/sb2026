@@ -1,0 +1,51 @@
+Alchemist
+Animator
+Archer
+Berserker
+Black Mask
+Blacksmith
+Blade Master
+Blade Weaver
+Blood Prophet
+Bounty Hunter
+Clanwarden
+Commander
+Dark Knight
+Duelist
+Forge Master
+Giant Killer
+Gladiator
+Huntsman
+Knight
+Rat Catcher
+Rune Caster
+Enchanter
+Storm Lord
+Summoner
+Sundancer
+Trainer
+Traveler
+Undead Hunter
+Werebear
+Wererat
+Werewolf
+Wyrmslayer
+Conjurer
+Darksworn
+Valkyr
+Blood Horn
+Shroudborne
+Archmage
+Thrall
+Artillerist
+Savant
+Sky Dancer
+Prospector
+Belgosch
+Drannok
+Gorgoi
+Strigoi
+Sapper
+Saboteur
+Battle Magus
+Sanctifier
