@@ -1,0 +1,22 @@
+Acid Rain
+Ash
+Blizzard
+Blood Rain
+Chaos Acid Rain
+Chaos Ash
+Chaos Blood Rain
+Heavy Rain
+Rain
+Snow
+BasicRain
+BasicSleet
+BasicSnow
+STANDARDRAIN
+BLACK RAIN
+STANDARDWIND
+BLACK SNOW
+BLIZZARD
+MIST
+SNOW
+StandardSnow
+StandardSleet

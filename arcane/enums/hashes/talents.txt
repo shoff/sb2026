@@ -1,0 +1,22 @@
+Admin
+Nightvision
+Ambidexterity
+SpiMaxIncrease
+DexMaxIncrease
+ConMaxIncrease
+StrMaxIncrease
+StamMaxIncrease
+IntMaxIncrease
+HealthMaxIncrease
+ManaMaxIncrease
+Background
+Mentor
+Apprentice
+Blood Gift
+Childhood
+Constitution
+Dexterity
+Intelligence
+Spirit
+Strength
+Subrace
