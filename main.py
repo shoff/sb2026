@@ -12,11 +12,11 @@ from PyQt6.QtWidgets import QApplication
 # Add parent directory to path for arcane imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shadowbane_viewer.ui.main_window import MainWindow
-from shadowbane_viewer.ui.asset_browser import AssetBrowserWidget
-from shadowbane_viewer.ui.opengl_viewport import OpenGLViewport
-from shadowbane_viewer.ui.animation_timeline import AnimationTimelineWidget
-from shadowbane_viewer.assets.asset_manager import AssetManager
+from ui.main_window import MainWindow
+from ui.asset_browser import AssetBrowserWidget
+from ui.opengl_viewport import OpenGLViewport
+from ui.animation_timeline import AnimationTimelineWidget
+from assets.asset_manager import AssetManager
 
 
 class ShadowbaneViewer:
@@ -153,7 +153,7 @@ class ShadowbaneViewer:
             if self.viewport.skeletal_animator is not None:
                 motion = self.asset_manager.load_motion(asset_id)
                 if motion:
-                    from shadowbane_viewer.animation.animation_controller import AnimationController
+                    from animation.animation_controller import AnimationController
                     self.viewport.animation_controller = AnimationController(motion)
 
                     # Update timeline with new animation

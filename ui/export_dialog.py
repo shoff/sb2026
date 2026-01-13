@@ -11,8 +11,8 @@ from PyQt6.QtCore import Qt
 from pathlib import Path
 from typing import Optional
 
-from ..export.obj_exporter import OBJExporter
-from ..export.gltf_exporter import GLTFExporter
+from export.obj_exporter import OBJExporter
+from export.gltf_exporter import GLTFExporter
 
 
 class ExportDialog(QDialog):

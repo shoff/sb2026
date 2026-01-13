@@ -6,7 +6,7 @@ import numpy as np
 from enum import Enum
 from typing import Dict, Optional
 
-from .interpolation import lerp, slerp
+from animation.interpolation import lerp, slerp
 
 
 class PlaybackState(Enum):

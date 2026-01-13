@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+name: Dev Log
+description: Instructs the agent to generate a markdown file after each response that documents current progress, outstanding tasks, and suggested next steps in a machine-ingestible summary format.
+globs:
+  - "**/*"
+tags:
+  - csharp
+  - codingstyle
+  - formatting
+  - conventions
+  - architecture
+  - oop
+  - functional
+  - solid
+  - development
+priority: 1
+version: "1.0.0"
+alwaysApply: true
+--- 
+# rule content:
+
+After each interaction or modification to the solution, the agent must append or update a markdown file named {mmddyy}.md, where the format represents the current UTC date in MMDDYY (e.g., 042225.md for April 22, 2025). These files are store in the root of the solution in a folder named dev_log.
+
+This markdown file must include the following top-level sections:
+
+## Summary
+
+A concise but complete explanation of what was accomplished in the latest update.
+
+## Current Work
+
+A clear outline of what functionality, design, data, or concepts are currently being worked on.
+
+## Remaining Tasks
+
+A prioritized list of unfinished or pending features, bugs, or refactors.
+
+## Recommendations
+
+AI-suitable suggestions for architectural improvements, optimizations, features, integrations, or validations based on current progress.
+The markdown must be cleanly structured, valid UTF-8 text, and use standard Markdown 1.0 syntax to ensure compatibility with vector-based semantic ingestion.
+
+The file must be written or updated immediately after each completed reply or operation.
+
+If no work has occurred yet, the agent will generate an initial scaffold markdown file with empty sections except ## Summary, which should state: Session initialized.
+
+Do not create placeholder or empty bullet points. If a section has no content yet, omit it entirely.
+
+The agent must never duplicate entries. If the task was already listed and is now completed, remove it from Remaining Tasks and describe it under Summary.
+
+All recommendations should be grounded in the current codebase and progress—no vague or speculative filler allowed.
+
+
+If the correct .md file does not exist, create it!

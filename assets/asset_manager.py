@@ -10,14 +10,25 @@ from PIL import Image
 
 # Import arcane asset classes
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from pathlib import Path as PathLib
 
-from arcane.ArcMesh import ArcMesh
-from arcane.ArcImage import ArcTexture
-from arcane.ArcSkeleton import ArcSkeleton
-from arcane.ArcMotion import ArcMotion
-from arcane.ArcRender import ArcRender
-from arcane.ArcCObject import ArcCObject
+# Add parent directory to path for arcane imports
+parent_dir = PathLib(__file__).parent.parent.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+try:
+    from arcane.ArcMesh import ArcMesh
+    from arcane.ArcImage import ArcTexture
+    from arcane.ArcSkeleton import ArcSkeleton
+    from arcane.ArcMotion import ArcMotion
+    from arcane.ArcRender import ArcRender
+    from arcane.ArcCObject import ArcCObject
+except ImportError as e:
+    raise ImportError(
+        f"Failed to import arcane package. Make sure the 'arcane' package is available in the parent directory ({parent_dir}). "
+        f"Original error: {e}"
+    )
 
 
 class AssetManager:

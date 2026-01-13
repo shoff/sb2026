@@ -9,12 +9,12 @@ from OpenGL.GL import *
 import numpy as np
 from typing import Optional
 
-from ..rendering.camera import Camera
-from ..rendering.shader_manager import ShaderManager
-from ..rendering.mesh_renderer import MeshRenderer
-from ..rendering.texture_manager import TextureManager
-from ..animation.skeletal_animator import SkeletalAnimator
-from ..animation.animation_controller import AnimationController
+from rendering.camera import Camera
+from rendering.shader_manager import ShaderManager
+from rendering.mesh_renderer import MeshRenderer
+from rendering.texture_manager import TextureManager
+from animation.skeletal_animator import SkeletalAnimator
+from animation.animation_controller import AnimationController
 import time
 
 

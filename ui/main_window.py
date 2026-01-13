@@ -236,7 +236,7 @@ class MainWindow(QMainWindow):
     def _on_export_asset(self):
         """Handle Export Asset menu action."""
         # Import here to avoid circular dependency
-        from .export_dialog import ExportDialog
+        from ui.export_dialog import ExportDialog
 
         if not hasattr(self, 'viewport') or not hasattr(self, 'asset_manager'):
             QMessageBox.warning(

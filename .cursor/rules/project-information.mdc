@@ -1,0 +1,61 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description:
+Instructs the agent to treat project_information.md as the canonical index for understanding the structure, components, and patterns in the solution. The agent must read it at the beginning of every conversation and update it when new, relevant details are discovered.
+
+globs:
+  - **/project_information.md
+tags:
+  - architecture-index
+  - project-state
+  - self-documenting
+  - persistent-knowledge
+  - read-before-acting
+  - auto-update
+  - canonical-structure
+  - ai-ingestion
+  - system-map
+priority: 1
+version: "1.0.0"
+alwaysApply: true
+---
+
+## Instructions
+
+- The agent must read project_information.md at the start of each session or conversation, and whenever it needs to understand:
+
+- Project layout or directory structure
+- Key architectural patterns
+- API usage or contracts
+- Naming conventions or file ownership
+- Relationships between components
+- External service integrations
+- Authentication, authorization, and configuration mechanics
+- Known limitations, assumptions, or TODOs
+
+- The agent must treat the file as a live architectural reference and rely on it before asking clarifying questions.
+
+- If, during operation, the agent encounters new or updated information that improves, corrects, or extends project_information.md, it must do one of the following:
+
+- Update the appropriate section(s) inline.
+
+- If no section exists, create a new one with a clear header and concise structure.
+
+- If conflicting data exists, annotate with ⚠️ and log a note at the top under a ## Inconsistencies section for human resolution.
+
+- Do not duplicate information. Consolidate and normalize.
+
+- Prefer bullet points, clean headings, and short paragraphs for readability and LLM ingestion.
+
+- Do not include ephemeral status updates, metrics, or WIP commentary—those belong in daily {mmddyy}.md logs.
+
+- Avoid using speculative language. The file should represent confirmed, current understanding of the system.
+
+
+
+
+- Sections in the file should be kept alphabetically sorted where possible for easier lookup

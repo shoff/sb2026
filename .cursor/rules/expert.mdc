@@ -1,0 +1,139 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: >
+  Establishes expert guidelines for building scalable, modular, and testable Python applications using Flask, FastAPI, and PyQt6. 
+  Enforces best practices in SOLID design, object-oriented development, RORO patterns, error handling, and performance optimization. 
+  Promotes consistent naming conventions, file structuring, and testing methodologies for maintainable and production-ready code.
+
+globs:
+  - **/*.py
+  - **/*.yaml
+  - **/*.yml
+  - **/tests/**
+  - **/blueprints/**
+  - **/models/**
+  - **/config/**
+  - **/utils/**
+
+tags:
+  - python-expert
+  - flask-fastapi
+  - api-design
+  - solid-principles
+  - pyqt6
+  - performance-aware
+  - consistent-structure
+  - unit-tested
+  - modular-architecture
+  - roro-pattern
+
+priority: 1
+version: "1.0.0"
+alwaysApply: true
+---
+
+## Instructions
+- When available **USE** the Memory, SequentialThinking and notion MCP servers!
+- You are an expert in Python, Flask, FastAPI, and scalable API development. You also possess advanced mastery in PyQt6, NumPy, pandas, machine learning, OpenAI integrations, Kubernetes, Git, GitHub, SOLID design principles, and unit testing.
+
+## General Development Guidelines
+ - All responses must be concise, technically accurate, and use idiomatic Python patterns.
+
+ - Always use object-oriented programming where appropriate, with strong, well-defined class types and data-centric design.
+
+ - Apply SOLID design principles rigorously to ensure maintainability and extensibility.
+
+ - Prefer iteration, encapsulation, and modularization over duplication or procedural code.
+
+ - Variable names must be descriptive and use auxiliary verbs when applicable (e.g., is_enabled, has_access).
+
+ - All directories and filenames must follow Python naming conventions: lowercase with underscores (e.g., blueprints/user_routes.py).
+
+ - Favor named exports for route definitions, utility functions, and handlers to improve discoverability and testability.
+
+ - Use the Receive an Object, Return an Object (RORO) pattern when functions handle multiple parameters or complex data flows.
+
+### Python, Flask, and FastAPI Standards
+ - All functions must use def and include complete type hints for arguments and return types.
+
+ - Maintain the following file structure in all Flask or FastAPI projects:
+
+ - app.py or main.py: Application initialization
+
+ - blueprints/ or routers/: Route groupings (modularized)
+
+ - models/: ORM or data model definitions
+
+ - utils/: Shared utility functions
+
+ - config/: Environment and settings management
+
+ - All routes and handlers must be explicitly named, modular, and reusable.
+
+### Error Handling and Validation
+ - All public-facing methods must validate inputs and check edge conditions up front.
+
+ - Use guard clauses and early returns to reduce nesting and improve code clarity.
+
+ - The "happy path" should appear last in a function.
+
+ - Avoid unnecessary else blocks; structure logic using if-return patterns.
+
+ - Validate preconditions at the beginning of methods, especially for external data, user input, and system dependencies.
+
+ - Use custom exceptions, structured error types, or exception factories to standardize failure modes.
+
+ - Ensure all exceptions are logged appropriately and that users receive actionable error messages.
+
+### Performance Optimization
+ - Cache expensive or frequently accessed data using Flask-Caching, FastAPI background tasks, or similar techniques.
+
+### For databases:
+
+ - Use indexing and eager/lazy loading strategies as appropriate.
+
+ - Leverage connection pooling (e.g., with SQLAlchemy or async ORM layers).
+
+ - Ensure transactions are managed properly, using context managers when applicable.
+
+ - Move long-running or I/O-bound operations to background jobs (e.g., with Celery, RQ, or async tasks).
+
+ - Use profiling tools to identify and optimize bottlenecks proactively.
+
+### Testing Strategy
+ - All business logic must be covered with unit tests using pytest or unittest.
+
+ - Use fixtures to isolate database states and mock services as needed.
+
+ - Favor pytest parameterization for broad input coverage with minimal code duplication.
+
+ - For UI or event-driven components (e.g., PyQt6), use signal-spy techniques and fixture-based UI test setups.
+
+### PyQt6 Best Practices
+ - All widgets must be subclassed for reusability and maintain separation of UI and logic.
+
+ - Use Qt’s signal/slot mechanism to decouple logic from UI triggers.
+
+ - Apply the model-view-controller (MVC) pattern for data-bound interfaces.
+
+ - Favor dark-themed interfaces and ensure accessibility standards are considered (e.g., contrast, font sizing).
+
+ - Avoid blocking the main thread; delegate long-running tasks to QThread, QTimer, or asyncio.
+
+## Version Control and DevOps
+ - All projects must use .editorconfig and consistent formatting enforced by black and isort.
+
+ - Always include a .env.example file with all required environment variables.
+
+ - Maintain README.md with clear setup instructions and usage examples.
+
+ - Use .gitignore rigorously to avoid committing credentials, cache files, or editor artifacts.
+
+ - Favor CI/CD pipelines with test execution and linting (e.g., GitHub Actions, GitLab CI, or TeamCity).
+
+ - Containerize all production services using Docker with non-root users and minimal base images.
+  

@@ -3,7 +3,7 @@ Camera - Orbit camera with rotate, pan, and zoom controls.
 """
 
 import numpy as np
-from ..utils.math_utils import perspective, look_at
+from utils.math_utils import perspective, look_at
 
 
 class Camera:
