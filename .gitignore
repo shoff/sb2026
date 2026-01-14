@@ -1,7 +1,7 @@
 # Environment variables
 .env
 arcane_dump/
-
+wpak/
 # Python
 __pycache__/
 *.py[cod]

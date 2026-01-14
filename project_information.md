@@ -2,6 +2,10 @@
 
 Canonical index for the Shadowbane Asset Viewer project structure, components, patterns, and architecture.
 
+## Inconsistencies
+
+- ⚠️ **Monolithic `.cache` header size**: `sb.exe` writer path (`FUN_007dcba0`) writes a **0x10-byte** header (4×u32) + directory records, while some disk-backed notes in the repo describe a **0x28-byte** header. This must be reconciled against a real `Mesh.cache`/`Textures.cache` file from disk.
+
 ## Architecture Overview
 
 The Shadowbane Asset Viewer is a desktop application built with PyQt6 and PyOpenGL for viewing, animating, and exporting game assets from Shadowbane (2002 MMORPG). The application follows a modular architecture with clear separation of concerns:
@@ -41,6 +45,56 @@ The application supports the following asset types loaded from `arcane_dump/` fo
 
 - The UI browses assembled assets (COBJECTS → RENDER → MESH/TEXTURE) via `assets/asset_catalog.py`
 - The catalog classifies assets primarily from `arcane_dump/COBJECTS/<CATEGORY>/` (e.g., `ITEM`, `STRUCTURE`, `RUNE`)
+
+### Original Client Asset System (sb.exe) — Confirmed Reverse-Engineering Notes
+
+- **Cache roots**: the original client uses both `cache/Text/` and `cache/Binary/`.
+  - **Evidence**: `FUN_0088aad0` sets config fields from string constants `s_cache_Text__016e0ef8` and `s_cache_Binary__01716070`.
+- **Central miss-load engine**: `ArcFileCache` is the core “miss-load” mechanism for many assets.
+  - **Evidence**:
+    - RTTI `.?AVArcFileCache@@` (`0x01704c78`) and source path `...\\ObjectServer\\ArcFileCache.cpp` (`0x01704d58`)
+    - Miss-load loop `FUN_007da440` (build path from `ArcCacheID` → call `open_decode_fn` → set id → insert)
+- **`ArcFileCache` loader indirections (resolved)**:
+  - **BuildPathFromID**: vtable slot `+8` resolves to `FUN_007da120`.
+    - **Evidence**: ctor `FUN_007d8c50` sets vtable `0x0155a97c`; XREF from `0x0155a984` (`vtable+8`) to `FUN_007da120`.
+  - **open_decode_fn / binary_load_fn**:
+    - `binary_load_fn` stored at `this+0x50` by `FUN_007d8c50` ctor arg
+    - `open_decode_fn` stored at `this+0x84` by `FUN_007da010(cache, fn)`
+    - Both wired per cache subtype in `FUN_0091d6b0` (see `ASSET_LOADER_DISPATCH_SPEC.md`).
+- **Monolithic `*.cache` container (selection, write, lookup) — proven**:
+  - **Container selection**: `FUN_007dba30` appends `PTR_s_Textures_0170508c[this->subtype]` + `".cache"` (`0x01704f08`) to build the monolithic container filename.
+  - **Header+directory writer**: `FUN_007dcba0` writes a 0x10-byte header (4×u32) and then 0x14-byte directory records containing `(ArcCacheID low32/high32, stream_off, uncompressed_size, compressed_size)`.
+  - **Directory lookup**: `FUN_007db8f0` performs **binary search** over directory entries (`[this+0x54, this+0x58)`, stride `0x18`) comparing by full `ArcCacheID` (two dwords).
+  - **Entry point**: `FUN_007d8fb0` opens the `*.cache` file, reads/updates directory state, and invokes the writer/lookup helpers.
+- **Text formats (parsers/writers exist in `sb.exe`)**:
+  - **Meshes**: `ArcMesh` is parsed from tokenized text with `_VERTICES_` and `_INDICES_`.
+    - **Evidence**: `FUN_005a12e0` (parser) and `FUN_005a2d50` (writer), `ArcMesh.cpp` string `016d63fc`.
+  - **Motions**: `ArcMotion` is parsed from tokenized text and logs `Reading ArcMotion from text %s`.
+    - **Evidence**: `FUN_005b9d00`, `ArcMotion.cpp` string `016d6cc8`.
+  - **Skeletons**: `ArcSkeleton` is parsed from tokenized text and references motion IDs; validates motion existence.
+    - **Evidence**: `FUN_005d5d90` (parser) and `FUN_005d8152` (ValidateMotions), `ArcSkeleton.cpp` string `016d7bb8`.
+  - **Mesh/texture sets**: tag blocks such as `<BEGINMESHSET>` and `<BEGINTEXTURESET>` exist.
+    - **Evidence**: `FUN_005d30d0` handles `<BEGINMESHSET>`; `FUN_005c6e40` handles `<BEGINTEXTURESET>`.
+- **Render binding**:
+  - `ArcObj` binds renderobjects via cache-id tokens `RENDEROBJECT` and `RENDEROBJECTLOWDETAIL`.
+    - **Evidence**: `FUN_004d16a0` stores cache-id into `this+0xB8` and `this+200`.
+  - Texture-set selection propagates recursively to child render objects.
+    - **Evidence**: `FUN_005c8170` recurses child pointers and applies a texture-set index.
+  - **Texture GPU upload**: `ArcImage::TextureGLInit` is implemented in `FUN_00590a90` and performs `glTexImage*` upload + `glTexParameteri`/`glPrioritizeTextures`.
+    - **Evidence**: `FUN_00590a90` contains `ArcImage::TextureGLInit - texture upload` string `0x016d5474`.
+  - **Mesh CPU vertex element sizes (confirmed)**:
+    - position: float3 (12 bytes) via `FUN_005a43a0`
+    - normal: float3 (12 bytes) via `FUN_005a4460`
+    - uv: float2 (8 bytes) via `FUN_005a4530`
+
+### Original Client Modules — Ownership (confirmed)
+
+- **Core.dll**
+  - **Primary responsibilities**: core utilities (threading/synchronization, memory mgmt, file/stream IO abstractions, encryption, wpak container IO)
+  - **Evidence**:
+    - **Exports**: `core::BlowfishEncryption` (`?Encrypt/?Decrypt/?Reset`), `core::WPakFile::*`, `core::TextWPakFile::*` (via `list_exports`)
+    - **RTTI/class names**: `core::String`, `StringTokenizer`, `Thread`, `Mutex`, `RWLock`, `MemoryManager`, `IOBinStreamInterface`/`IOTextStreamInterface`, `EncryptedStream`, `WPakFile` (via `list_classes`)
+    - **Logging strings**: `core::WPakFile::Open: Error opening wpak file for reading`, `...Can't find internal file ...` (via `list_strings` filter `Pak`)
 
 ## Authentication and Authorization
 
