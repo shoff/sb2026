@@ -1,0 +1,598 @@
+{
+  "programName": "sb.exe",
+  "timestamp": "2026-01-14 22:34:51",
+  "allocator": "00cd8970",
+  "anchorCallees": ["00cd9870", "00ce1ac0", "00ce42a0", "00ceb330", "00ceb650", "00cda500"],
+  "totalAllocatorCallers": 226,
+  "totalChainsFound": 39,
+  "totalChainsWithRecoveredObject": 0,
+  "totalFieldReads": 0,
+  "totalFieldReadsIntoCalls": 0,
+  "chains": [
+    {
+      "callerFunction": "FUN_00cd9e50",
+      "callerEntry": "00cd9e50",
+      "allocatorCallSite": "00cd9e58",
+      "ctorCallSite": "00cd9edb",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cd9b30",
+      "callerEntry": "00cd9b30",
+      "allocatorCallSite": "00cd9b38",
+      "ctorCallSite": "00cd9b6e",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cd9d70",
+      "callerEntry": "00cd9d70",
+      "allocatorCallSite": "00cd9d78",
+      "ctorCallSite": "00cd9d94",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cda210",
+      "callerEntry": "00cda210",
+      "allocatorCallSite": "00cda218",
+      "ctorCallSite": "00cda26a",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cef6d0",
+      "callerEntry": "00cef6d0",
+      "allocatorCallSite": "00cef6d8",
+      "ctorCallSite": "00cef770",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce85f0",
+      "callerEntry": "00ce85f0",
+      "allocatorCallSite": "00ce85f8",
+      "ctorCallSite": "00ce8650",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce87a0",
+      "callerEntry": "00ce87a0",
+      "allocatorCallSite": "00ce87a8",
+      "ctorCallSite": "00ce8807",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce8a20",
+      "callerEntry": "00ce8a20",
+      "allocatorCallSite": "00ce8a28",
+      "ctorCallSite": "00ce8b03",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cefd80",
+      "callerEntry": "00cefd80",
+      "allocatorCallSite": "00cefd88",
+      "ctorCallSite": "00cefe16",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0360",
+      "callerEntry": "00cf0360",
+      "allocatorCallSite": "00cf0368",
+      "ctorCallSite": "00cf03bc",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0550",
+      "callerEntry": "00cf0550",
+      "allocatorCallSite": "00cf0558",
+      "ctorCallSite": "00cf05f6",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0a30",
+      "callerEntry": "00cf0a30",
+      "allocatorCallSite": "00cf0a38",
+      "ctorCallSite": "00cf0a4f",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce9e30",
+      "callerEntry": "00ce9e30",
+      "allocatorCallSite": "00ce9e38",
+      "ctorCallSite": "00ce9e87",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce8b90",
+      "callerEntry": "00ce8b90",
+      "allocatorCallSite": "00ce8b98",
+      "ctorCallSite": "00ce8bbc",
+      "ctorCallee": "00ceb650",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce9090",
+      "callerEntry": "00ce9090",
+      "allocatorCallSite": "00ce9098",
+      "ctorCallSite": "00ce90e9",
+      "ctorCallee": "00cda500",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cdac40",
+      "callerEntry": "00cdac40",
+      "allocatorCallSite": "00cdac48",
+      "ctorCallSite": "00cdac6d",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce3060",
+      "callerEntry": "00ce3060",
+      "allocatorCallSite": "00ce3068",
+      "ctorCallSite": "00ce30f9",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce20a0",
+      "callerEntry": "00ce20a0",
+      "allocatorCallSite": "00ce20a8",
+      "ctorCallSite": "00ce20b8",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce2170",
+      "callerEntry": "00ce2170",
+      "allocatorCallSite": "00ce2178",
+      "ctorCallSite": "00ce2189",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce36a0",
+      "callerEntry": "00ce36a0",
+      "allocatorCallSite": "00ce36a8",
+      "ctorCallSite": "00ce3719",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cea550",
+      "callerEntry": "00cea550",
+      "allocatorCallSite": "00cea558",
+      "ctorCallSite": "00cea58b",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cea840",
+      "callerEntry": "00cea840",
+      "allocatorCallSite": "00cea848",
+      "ctorCallSite": "00cea937",
+      "ctorCallee": "00ceb330",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cea970",
+      "callerEntry": "00cea970",
+      "allocatorCallSite": "00cea978",
+      "ctorCallSite": "00cea9f5",
+      "ctorCallee": "00cda500",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ceffe0",
+      "callerEntry": "00ceffe0",
+      "allocatorCallSite": "00ceffe8",
+      "ctorCallSite": "00cf0068",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cdbad0",
+      "callerEntry": "00cdbad0",
+      "allocatorCallSite": "00cdbad8",
+      "ctorCallSite": "00cdbb36",
+      "ctorCallee": "00ce42a0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce2870",
+      "callerEntry": "00ce2870",
+      "allocatorCallSite": "00ce2878",
+      "ctorCallSite": "00ce2888",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce2930",
+      "callerEntry": "00ce2930",
+      "allocatorCallSite": "00ce2938",
+      "ctorCallSite": "00ce2948",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce2b50",
+      "callerEntry": "00ce2b50",
+      "allocatorCallSite": "00ce2b58",
+      "ctorCallSite": "00ce2bb2",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0dc0",
+      "callerEntry": "00cf0dc0",
+      "allocatorCallSite": "00cf0dc8",
+      "ctorCallSite": "00cf0dd8",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0e80",
+      "callerEntry": "00cf0e80",
+      "allocatorCallSite": "00cf0e88",
+      "ctorCallSite": "00cf0e98",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce3ab0",
+      "callerEntry": "00ce3ab0",
+      "allocatorCallSite": "00ce3ab8",
+      "ctorCallSite": "00ce3b12",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce7840",
+      "callerEntry": "00ce7840",
+      "allocatorCallSite": "00ce7848",
+      "ctorCallSite": "00ce7874",
+      "ctorCallee": "00ce42a0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce7bc0",
+      "callerEntry": "00ce7bc0",
+      "allocatorCallSite": "00ce7bc8",
+      "ctorCallSite": "00ce7c0f",
+      "ctorCallee": "00ce42a0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce7c60",
+      "callerEntry": "00ce7c60",
+      "allocatorCallSite": "00ce7c68",
+      "ctorCallSite": "00ce7cd4",
+      "ctorCallee": "00ce42a0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce9680",
+      "callerEntry": "00ce9680",
+      "allocatorCallSite": "00ce9688",
+      "ctorCallSite": "00ce9702",
+      "ctorCallee": "00ceb330",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00ce97f0",
+      "callerEntry": "00ce97f0",
+      "allocatorCallSite": "00ce97f8",
+      "ctorCallSite": "00ce9827",
+      "ctorCallee": "00cda500",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf00b0",
+      "callerEntry": "00cf00b0",
+      "allocatorCallSite": "00cf00b8",
+      "ctorCallSite": "00cf00f8",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0200",
+      "callerEntry": "00cf0200",
+      "allocatorCallSite": "00cf0208",
+      "ctorCallSite": "00cf026a",
+      "ctorCallee": "00cd9870",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    },
+    {
+      "callerFunction": "FUN_00cf0770",
+      "callerEntry": "00cf0770",
+      "allocatorCallSite": "00cf0778",
+      "ctorCallSite": "00cf0788",
+      "ctorCallee": "00ce1ac0",
+      "objectRecovered": false,
+      "objectSeedVarnode": "",
+      "objectNote": "Allocator CALL has no output varnode",
+      "taintNotes": [],
+      "fieldReads": [
+      ],
+      "callArgFlows": [
+      ]
+    }
+  ]
+}

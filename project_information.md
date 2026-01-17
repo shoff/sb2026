@@ -86,6 +86,10 @@ The application supports the following asset types loaded from `arcane_dump/` fo
     - position: float3 (12 bytes) via `FUN_005a43a0`
     - normal: float3 (12 bytes) via `FUN_005a4460`
     - uv: float2 (8 bytes) via `FUN_005a4530`
+- **Immediate render payload layout (confirmed)**:
+  - `RenderPayload+0x64` → positions pointer (float3 array) used by `glVertex3f` in `FUN_005aadc0`.
+  - `RenderPayload+0x70` → UV pointer (float2 array) used by `glTexCoord2f` in `FUN_005aadc0`.
+  - `RenderPayload+0x7C` → normals pointer (float3 array) used by `glNormal3f` in `FUN_005aadc0`.
 
 ### Original Client Modules — Ownership (confirmed)
 

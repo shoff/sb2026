@@ -1,0 +1,391 @@
+# Asset viewer reverse-engineering payload (paste into Cursor)
+
+Target program: sb.exe
+Allocator address: 00cd8970
+Observed small object sizes: 0x24, 0x28, 0x2c, 0x30
+
+Key findings (do not argue, implement around these facts):
+- Multiple ctor/init callees allocate via allocator @ 00cd8970
+- Several of these small objects are intrusive-list nodes: writes to fields at offsets +0x24 (next) and +0x28 (prev) occur inside ctor/init callees.
+- This means that for at least some objects, offsets +0x24/+0x28 are linkage, not payload.
+
+High-value ctor/init callees (addresses) and what they imply:
+
+## SIZE 0x24
+- FUN_00cd9870 @ 00cd9870 | ctorCalls=2 | writesToThis=246 | listNext24=2 | listPrev28=2 | bulkInit=4
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:46, 0x44:20, 0x84:14, 0xc:12, 0x8:10, 0x14:10, 0x148:8, 0x20:6, 0x144:6, 0x10:6, 0x18:6, 0x1c:6
+  - Concrete writes to [this+0x24]:
+    - 00cda6e7  dword ptr [ECX + 0x24]
+    - 00cda6e7  dword ptr [ECX + 0x24]
+  - Concrete writes to [this+0x28]:
+    - 00cda6f1  dword ptr [EDX + 0x28]
+    - 00cda6f1  dword ptr [EDX + 0x28]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cd999d  MOV dword ptr [EAX + 0x4]
+    - 00cd99f4  MOV dword ptr [EDX]
+    - 00cd9a0a  MOV dword ptr [ECX]
+    - 00cd9a12  MOV dword ptr [EAX + 0x8]
+    - 00cd9a55  MOV dword ptr [EAX]
+    - 00cd9a5e  MOV dword ptr [ECX + 0x4]
+    - 00cd9a68  MOV dword ptr [EDX + 0x8]
+    - 00cd9a72  MOV dword ptr [EAX + 0xc]
+    - 00cd9a7c  MOV dword ptr [ECX + 0x10]
+    - 00cd9a86  MOV dword ptr [EDX + 0x14]
+    - 00cd9a90  MOV dword ptr [EAX + 0x18]
+    - 00cd9a9a  MOV dword ptr [ECX + 0x1c]
+    - 00cd9ad2  MOV dword ptr [ECX]
+    - 00cd9bee  MOV dword ptr [ECX]
+    - 00cd9bf6  MOV dword ptr [EAX + 0x4]
+    - 00cd9bff  MOV dword ptr [EDX + 0x8]
+    - 00cd9c08  MOV dword ptr [ECX + 0xc]
+    - 00cd9c36  MOV dword ptr [EDX + 0x8]
+- FUN_00ce0c50 @ 00ce0c50 | ctorCalls=1 | writesToThis=56 | listNext24=0 | listPrev28=0 | bulkInit=2
+  - Top written offsets: 0x4:7, 0x148:3, 0xc:3, 0x17c:3, 0x40:2, 0x144:2, 0x44:2, 0x8:2, 0xffffffffffffffff:1, 0x1:1, 0xfffffffffffffffc:1, 0x14c:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ce0dbe  MOV dword ptr [ECX]
+    - 00ce0e1c  MOV dword ptr [EAX]
+    - 00ce0e2d  MOV dword ptr [ECX + 0x8]
+    - 00ce0e36  MOV dword ptr [EAX + 0x10]
+    - 00ce0edd  MOV dword ptr [ECX]
+    - 00ce1156  MOV dword ptr [EDX]
+    - 00ce1170  MOV dword ptr [EAX]
+    - 00ce13ef  MOV dword ptr [EAX]
+    - 00ce140b  MOV dword ptr [ECX + 0x4]
+    - 00ce1587  MOV dword ptr [EAX]
+    - 00ce167e  MOV dword ptr [EAX]
+    - 00ce18a6  MOV dword ptr [ECX]
+    - 00ce19b2  MOV dword ptr [ECX + 0x144]
+    - 00ce19e0  MOV dword ptr [EAX]
+    - 00ce19e9  MOV dword ptr [ECX + 0x144]
+    - 00ce19f6  MOV dword ptr [EDX + 0x148]
+    - 00ce1a03  MOV dword ptr [EAX + 0x17c]
+    - 00ce1ae0  MOV dword ptr [EAX + EDX*0x4 + 0x14c]
+- FUN_00ce0cd0 @ 00ce0cd0 | ctorCalls=1 | writesToThis=56 | listNext24=0 | listPrev28=0 | bulkInit=2
+  - Top written offsets: 0x4:7, 0x148:3, 0xc:3, 0x17c:3, 0x40:2, 0x144:2, 0x44:2, 0x8:2, 0xffffffffffffffff:1, 0x1:1, 0xfffffffffffffffc:1, 0x14c:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ce0dbe  MOV dword ptr [ECX]
+    - 00ce0e1c  MOV dword ptr [EAX]
+    - 00ce0e2d  MOV dword ptr [ECX + 0x8]
+    - 00ce0e36  MOV dword ptr [EAX + 0x10]
+    - 00ce0edd  MOV dword ptr [ECX]
+    - 00ce1156  MOV dword ptr [EDX]
+    - 00ce1170  MOV dword ptr [EAX]
+    - 00ce13ef  MOV dword ptr [EAX]
+    - 00ce140b  MOV dword ptr [ECX + 0x4]
+    - 00ce1587  MOV dword ptr [EAX]
+    - 00ce167e  MOV dword ptr [EAX]
+    - 00ce18a6  MOV dword ptr [ECX]
+    - 00ce19b2  MOV dword ptr [ECX + 0x144]
+    - 00ce19e0  MOV dword ptr [EAX]
+    - 00ce19e9  MOV dword ptr [ECX + 0x144]
+    - 00ce19f6  MOV dword ptr [EDX + 0x148]
+    - 00ce1a03  MOV dword ptr [EAX + 0x17c]
+    - 00ce1ae0  MOV dword ptr [EAX + EDX*0x4 + 0x14c]
+- FUN_00ceb650 @ 00ceb650 | ctorCalls=1 | writesToThis=27 | listNext24=1 | listPrev28=1 | bulkInit=0
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:3, 0xc:3, 0x8:2, 0x10:2, 0x14:2, 0x18:2, 0x1c:2, 0x20:1, 0x24:1, 0x28:1, 0x2c:1, 0x30:1
+  - Concrete writes to [this+0x24]:
+    - 00cecba4  dword ptr [EDX + 0x24]
+  - Concrete writes to [this+0x28]:
+    - 00cecdd0  dword ptr [EDX + 0x28]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ceb6e3  MOV dword ptr [EDX]
+    - 00ceb7c8  MOV dword ptr [EDX + 0x4]
+    - 00cebad8  MOV dword ptr [EDX + 0xc]
+    - 00cebd02  MOV dword ptr [EDX + 0x10]
+    - 00cebf98  MOV dword ptr [ECX + 0x14]
+    - 00cec29a  MOV dword ptr [EDX + 0x18]
+    - 00cec608  MOV dword ptr [EDX + 0x1c]
+    - 00cec90c  MOV dword ptr [EAX + 0x20]
+    - 00cecba4  MOV dword ptr [EDX + 0x24]
+    - 00cecdd0  MOV dword ptr [EDX + 0x28]
+    - 00cecf90  MOV dword ptr [EAX + 0x2c]
+    - 00ced0e4  MOV dword ptr [EDX + 0x30]
+    - 00ced1cc  MOV dword ptr [EDX + 0x34]
+    - 00ced248  MOV dword ptr [EAX + 0x38]
+    - 00ced251  MOV dword ptr [EDX + 0x3c]
+    - 00ced2f3  MOV dword ptr [EDX]
+    - 00ced3d8  MOV dword ptr [EDX + 0x4]
+    - 00ced52a  MOV dword ptr [ECX + 0x8]
+
+## SIZE 0x28
+- FUN_00cdf040 @ 00cdf040 | ctorCalls=1 | writesToThis=97 | listNext24=0 | listPrev28=0 | bulkInit=2
+  - Top written offsets: 0x4:4, 0x148:3, 0x17c:3, 0x144:2, 0x10:1, 0xffffffffffffffff:1, 0x1:1, 0x8:1, 0xc:1, 0x14c:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cdf6c6  MOV dword ptr [EDX + 0x4]
+    - 00cdf6cf  MOV dword ptr [ECX]
+    - 00cdfd66  MOV dword ptr [EDX + 0x4]
+    - 00cdfd6f  MOV dword ptr [ECX]
+    - 00cdff9c  MOV byte ptr [ECX]
+    - 00cdffb5  MOV byte ptr [ECX]
+    - 00cdffce  MOV byte ptr [ECX]
+    - 00cdffe4  MOV byte ptr [ECX]
+    - 00cdfffd  MOV byte ptr [ECX]
+    - 00ce0016  MOV byte ptr [ECX]
+    - 00ce002f  MOV byte ptr [ECX]
+    - 00ce0045  MOV byte ptr [ECX]
+    - 00ce01af  MOV byte ptr [ECX]
+    - 00ce01c8  MOV byte ptr [ECX]
+    - 00ce01e1  MOV byte ptr [ECX]
+    - 00ce01f7  MOV byte ptr [ECX]
+    - 00ce0210  MOV byte ptr [ECX]
+    - 00ce0229  MOV byte ptr [ECX]
+- FUN_00ce0cd0 @ 00ce0cd0 | ctorCalls=1 | writesToThis=56 | listNext24=0 | listPrev28=0 | bulkInit=2
+  - Top written offsets: 0x4:7, 0x148:3, 0xc:3, 0x17c:3, 0x40:2, 0x144:2, 0x44:2, 0x8:2, 0xffffffffffffffff:1, 0x1:1, 0xfffffffffffffffc:1, 0x14c:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ce0dbe  MOV dword ptr [ECX]
+    - 00ce0e1c  MOV dword ptr [EAX]
+    - 00ce0e2d  MOV dword ptr [ECX + 0x8]
+    - 00ce0e36  MOV dword ptr [EAX + 0x10]
+    - 00ce0edd  MOV dword ptr [ECX]
+    - 00ce1156  MOV dword ptr [EDX]
+    - 00ce1170  MOV dword ptr [EAX]
+    - 00ce13ef  MOV dword ptr [EAX]
+    - 00ce140b  MOV dword ptr [ECX + 0x4]
+    - 00ce1587  MOV dword ptr [EAX]
+    - 00ce167e  MOV dword ptr [EAX]
+    - 00ce18a6  MOV dword ptr [ECX]
+    - 00ce19b2  MOV dword ptr [ECX + 0x144]
+    - 00ce19e0  MOV dword ptr [EAX]
+    - 00ce19e9  MOV dword ptr [ECX + 0x144]
+    - 00ce19f6  MOV dword ptr [EDX + 0x148]
+    - 00ce1a03  MOV dword ptr [EAX + 0x17c]
+    - 00ce1ae0  MOV dword ptr [EAX + EDX*0x4 + 0x14c]
+- FUN_00ce1ac0 @ 00ce1ac0 | ctorCalls=1 | writesToThis=107 | listNext24=3 | listPrev28=2 | bulkInit=2
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:10, 0x5c:7, 0xc:6, 0x14:6, 0x40:4, 0x44:4, 0x8:3, 0x10:3, 0x18:3, 0x24:3, 0xfffffffffffffffc:2, 0x48:2
+  - Concrete writes to [this+0x24]:
+    - 00ce4063  dword ptr [ECX + 0x24]
+    - 00ce4270  dword ptr [EDX + 0x24]
+    - 00ce432b  dword ptr [EAX + 0x24]
+  - Concrete writes to [this+0x28]:
+    - 00ce406d  dword ptr [EDX + 0x28]
+    - 00ce4498  dword ptr [EDX + 0x28]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ce1ae0  MOV dword ptr [EAX + EDX*0x4 + 0x14c]
+    - 00ce1b3b  MOV dword ptr [EAX + 0x17c]
+    - 00ce1bd7  MOV dword ptr [EAX]
+    - 00ce1d78  MOV byte ptr [EAX]
+    - 00ce1dab  MOV byte ptr [EAX]
+    - 00ce1dba  MOV byte ptr [EAX + 0x1]
+    - 00ce1dd6  MOV byte ptr [EDX]
+    - 00ce1dee  MOV byte ptr [EAX]
+    - 00ce1dff  MOV byte ptr [ECX]
+    - 00ce1e18  MOV byte ptr [ECX + -0x1]
+    - 00ce2204  MOV dword ptr [EDX + 0x4]
+    - 00ce2293  MOV dword ptr [ECX + 0xc]
+    - 00ce22d8  MOV dword ptr [EAX + ECX*0x4]
+    - 00ce22e7  MOV dword ptr [EDX + 0x4]
+    - 00ce2350  MOV dword ptr [EDX + -0x4]
+    - 00ce236b  MOV dword ptr [ECX]
+    - 00ce2383  MOV dword ptr [EDX + 0x4]
+    - 00ce23b8  MOV dword ptr [EAX + EDX*0x4]
+- FUN_00ce42a0 @ 00ce42a0 | ctorCalls=1 | writesToThis=81 | listNext24=1 | listPrev28=1 | bulkInit=5
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:6, 0xc:5, 0x10:5, 0x14:5, 0x8:4, 0x5c:4, 0x1aadd58:2, 0x18:2, 0xfffffffffffffffc:1, 0x24:1, 0x1aae16c:1, 0x48:1
+  - Concrete writes to [this+0x24]:
+    - 00ce432b  dword ptr [EAX + 0x24]
+  - Concrete writes to [this+0x28]:
+    - 00ce4498  dword ptr [EDX + 0x28]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ce42b0  MOV dword ptr [EAX + 0x5c]
+    - 00ce42e2  MOV dword ptr [ECX + 0x4c]
+    - 00ce42fa  MOV dword ptr [ECX]
+    - 00ce431c  MOV dword ptr [EAX + 0x48]
+    - 00ce432b  MOV dword ptr [EAX + 0x24]
+    - 00ce4380  MOV dword ptr [EAX + 0x5c]
+    - 00ce43b2  MOV dword ptr [ECX + 0x54]
+    - 00ce43cf  MOV dword ptr [ECX + 0x50]
+    - 00ce4489  MOV dword ptr [EDX + 0xc]
+    - 00ce4498  MOV dword ptr [EDX + 0x28]
+    - 00ce44b0  MOV dword ptr [ECX + 0x14]
+    - 00ce44d8  MOV dword ptr [EDX]
+    - 00ce4516  MOV dword ptr [EDX]
+    - 00ce4520  MOV dword ptr [ECX + 0x4]
+    - 00ce4529  MOV dword ptr [ECX]
+    - 00ce4593  MOV dword ptr [EDX + 0x5c]
+    - 00ce4599  MOV dword ptr [EAX + 0x14]
+    - 00ce45c4  MOV dword ptr [EAX + EDX*0x4]
+- FUN_00ce7950 @ 00ce7950 | ctorCalls=1 | writesToThis=55 | listNext24=0 | listPrev28=0 | bulkInit=18
+  - Top written offsets: 0x4:13, 0xc:9, 0x8:4, 0x14:2, 0x10:1, 0x18:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ce7a1e  MOV dword ptr [ECX]
+    - 00ce7a38  MOV dword ptr [ECX + 0x4]
+    - 00ce7a4f  MOV dword ptr [ECX + 0x10]
+    - 00ce7a74  MOV dword ptr [ECX + 0x14]
+    - 00ce7aac  MOV dword ptr [ECX + 0x18]
+    - 00ce7b07  MOV dword ptr [ECX + 0x14]
+    - 00ce7ceb  MOV dword ptr [EAX]
+    - 00ce7fce  MOV dword ptr [EDX + 0x4]
+    - 00ce7fe0  MOV dword ptr [EAX + 0x8]
+    - 00ce82f3  MOV dword ptr [EAX]
+    - 00ce82fc  MOV dword ptr [ECX + 0x8]
+    - 00ce8306  MOV dword ptr [EDX + 0x4]
+    - 00ce838e  MOV dword ptr [EDX]
+    - 00ce83cc  MOV dword ptr [EAX]
+    - 00ce8452  MOV dword ptr [ECX + 0x4]
+    - 00ce845b  MOV dword ptr [EAX]
+    - 00ce8463  MOV dword ptr [EDX + 0x8]
+    - 00ce856f  MOV dword ptr [EAX + 0xc]
+- FUN_00ceb330 @ 00ceb330 | ctorCalls=1 | writesToThis=33 | listNext24=1 | listPrev28=1 | bulkInit=0
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:4, 0x8:4, 0xc:4, 0x10:2, 0x14:2, 0x18:2, 0x1c:2, 0x20:1, 0x24:1, 0x28:1, 0x2c:1, 0x30:1
+  - Concrete writes to [this+0x24]:
+    - 00cecba4  dword ptr [EDX + 0x24]
+  - Concrete writes to [this+0x28]:
+    - 00cecdd0  dword ptr [EDX + 0x28]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00ceb381  MOV dword ptr [EAX]
+    - 00ceb42e  MOV dword ptr [ECX + 0x8]
+    - 00ceb482  MOV dword ptr [EAX + 0xc]
+    - 00ceb51d  MOV dword ptr [EDX]
+    - 00ceb566  MOV dword ptr [EAX + 0x4]
+    - 00ceb5b0  MOV dword ptr [ECX + 0x8]
+    - 00ceb5f7  MOV dword ptr [EDX + 0xc]
+    - 00ceb6e3  MOV dword ptr [EDX]
+    - 00ceb7c8  MOV dword ptr [EDX + 0x4]
+    - 00ceb91a  MOV dword ptr [ECX + 0x8]
+    - 00cebad8  MOV dword ptr [EDX + 0xc]
+    - 00cebd02  MOV dword ptr [EDX + 0x10]
+    - 00cebf98  MOV dword ptr [ECX + 0x14]
+    - 00cec29a  MOV dword ptr [EDX + 0x18]
+    - 00cec608  MOV dword ptr [EDX + 0x1c]
+    - 00cec90c  MOV dword ptr [EAX + 0x20]
+    - 00cecba4  MOV dword ptr [EDX + 0x24]
+    - 00cecdd0  MOV dword ptr [EDX + 0x28]
+
+## SIZE 0x2c
+- FUN_00cd9870 @ 00cd9870 | ctorCalls=1 | writesToThis=123 | listNext24=1 | listPrev28=1 | bulkInit=2
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:23, 0x44:10, 0x84:7, 0xc:6, 0x8:5, 0x14:5, 0x148:4, 0x20:3, 0x144:3, 0x10:3, 0x18:3, 0x1c:3
+  - Concrete writes to [this+0x24]:
+    - 00cda6e7  dword ptr [ECX + 0x24]
+  - Concrete writes to [this+0x28]:
+    - 00cda6f1  dword ptr [EDX + 0x28]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cd999d  MOV dword ptr [EAX + 0x4]
+    - 00cd99f4  MOV dword ptr [EDX]
+    - 00cd9a0a  MOV dword ptr [ECX]
+    - 00cd9a12  MOV dword ptr [EAX + 0x8]
+    - 00cd9a55  MOV dword ptr [EAX]
+    - 00cd9a5e  MOV dword ptr [ECX + 0x4]
+    - 00cd9a68  MOV dword ptr [EDX + 0x8]
+    - 00cd9a72  MOV dword ptr [EAX + 0xc]
+    - 00cd9a7c  MOV dword ptr [ECX + 0x10]
+    - 00cd9a86  MOV dword ptr [EDX + 0x14]
+    - 00cd9a90  MOV dword ptr [EAX + 0x18]
+    - 00cd9a9a  MOV dword ptr [ECX + 0x1c]
+    - 00cd9ad2  MOV dword ptr [ECX]
+    - 00cd9bee  MOV dword ptr [ECX]
+    - 00cd9bf6  MOV dword ptr [EAX + 0x4]
+    - 00cd9bff  MOV dword ptr [EDX + 0x8]
+    - 00cd9c08  MOV dword ptr [ECX + 0xc]
+    - 00cd9c36  MOV dword ptr [EDX + 0x8]
+- FUN_00cdb140 @ 00cdb140 | ctorCalls=1 | writesToThis=107 | listNext24=0 | listPrev28=0 | bulkInit=0
+  - Top written offsets: 0x58:9, 0x84:5, 0x14:5, 0x44:4, 0x4:3, 0x10:3, 0xc4:2, 0x148:2, 0x8:2, 0xc:2, 0x38:2, 0x3c:2
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cdb1dd  MOV dword ptr [ECX + EDX*0x4 + 0x4]
+    - 00cdb1f0  MOV dword ptr [ECX + EAX*0x4 + 0xc4]
+    - 00cdb328  MOV dword ptr [ECX + EAX*0x4 + 0xc4]
+    - 00cdb34c  MOV dword ptr [ECX + 0x148]
+    - 00cdb4f6  MOV dword ptr [ECX]
+    - 00cdb50e  MOV dword ptr [EAX]
+    - 00cdb564  MOV dword ptr [ECX + EAX*0x4 + 0x84]
+    - 00cdb581  MOV dword ptr [ECX]
+    - 00cdb5a5  MOV dword ptr [EAX]
+    - 00cdb5bd  MOV dword ptr [EDX]
+    - 00cdb7c4  MOV byte ptr [EDX]
+    - 00cdbc07  MOV dword ptr [ECX + EAX*0x4 + 0x44]
+    - 00cdbc15  MOV dword ptr [EAX + EDX*0x4 + 0x84]
+    - 00cdbd12  MOV dword ptr [EAX]
+    - 00cdbd1a  MOV dword ptr [EDX + 0x144]
+    - 00cdbd2a  MOV dword ptr [EAX + 0x148]
+    - 00cdbd64  MOV dword ptr [EAX + EDX*0x4 + 0x44]
+    - 00cdbd78  MOV dword ptr [EDX + ECX*0x4 + 0x84]
+- FUN_00cdf040 @ 00cdf040 | ctorCalls=1 | writesToThis=97 | listNext24=0 | listPrev28=0 | bulkInit=2
+  - Top written offsets: 0x4:4, 0x148:3, 0x17c:3, 0x144:2, 0x10:1, 0xffffffffffffffff:1, 0x1:1, 0x8:1, 0xc:1, 0x14c:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cdf6c6  MOV dword ptr [EDX + 0x4]
+    - 00cdf6cf  MOV dword ptr [ECX]
+    - 00cdfd66  MOV dword ptr [EDX + 0x4]
+    - 00cdfd6f  MOV dword ptr [ECX]
+    - 00cdff9c  MOV byte ptr [ECX]
+    - 00cdffb5  MOV byte ptr [ECX]
+    - 00cdffce  MOV byte ptr [ECX]
+    - 00cdffe4  MOV byte ptr [ECX]
+    - 00cdfffd  MOV byte ptr [ECX]
+    - 00ce0016  MOV byte ptr [ECX]
+    - 00ce002f  MOV byte ptr [ECX]
+    - 00ce0045  MOV byte ptr [ECX]
+    - 00ce01af  MOV byte ptr [ECX]
+    - 00ce01c8  MOV byte ptr [ECX]
+    - 00ce01e1  MOV byte ptr [ECX]
+    - 00ce01f7  MOV byte ptr [ECX]
+    - 00ce0210  MOV byte ptr [ECX]
+    - 00ce0229  MOV byte ptr [ECX]
+- FUN_00cea2e0 @ 00cea2e0 | ctorCalls=1 | writesToThis=60 | listNext24=0 | listPrev28=0 | bulkInit=2
+  - Top written offsets: 0x4:13, 0x8:10, 0xc:9, 0x10:4, 0x14:3, 0x18:2, 0x1c:2, 0x20:1, 0xfffffffffffffffc:1
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cea342  MOV dword ptr [ECX]
+    - 00cea379  MOV dword ptr [EDX + 0x4]
+    - 00cea3b1  MOV dword ptr [ECX + 0x8]
+    - 00cea3e6  MOV dword ptr [EDX + 0xc]
+    - 00cea41b  MOV dword ptr [ECX + 0x10]
+    - 00cea576  MOV dword ptr [EDX + 0x4]
+    - 00cea627  MOV dword ptr [EAX + 0xc]
+    - 00cea7e2  MOV dword ptr [ECX + 0x4]
+    - 00cea806  MOV dword ptr [EDX + 0x4]
+    - 00cea867  MOV dword ptr [ECX + EAX*0x4 + -0x4]
+    - 00cea872  MOV dword ptr [EDX]
+    - 00cea8c0  MOV dword ptr [EDX + ECX*0x4]
+    - 00cea919  MOV dword ptr [EDX + ECX*0x4]
+    - 00ceab94  MOV dword ptr [EDX]
+    - 00ceabbe  MOV dword ptr [EAX]
+    - 00ceac35  MOV dword ptr [EAX]
+    - 00ceac81  MOV dword ptr [EAX + 0x4]
+    - 00ceacce  MOV dword ptr [EAX + 0x8]
+
+## SIZE 0x30
+- FUN_00cda500 @ 00cda500 | ctorCalls=1 | writesToThis=97 | listNext24=1 | listPrev28=0 | bulkInit=0
+  - Intrusive list confirmed in this callee (writes to [this+0x24] and/or [this+0x28]).
+  - Top written offsets: 0x4:7, 0x44:7, 0x84:7, 0x58:5, 0x148:4, 0x144:3, 0x10:3, 0x14:3, 0x20:2, 0xc4:2, 0x104:2, 0x38:2
+  - Concrete writes to [this+0x24]:
+    - 00cda6e7  dword ptr [ECX + 0x24]
+  - Sample writes (for recognizing struct layout patterns):
+    - 00cda6ab  MOV dword ptr [ECX + 0x4]
+    - 00cda6c9  MOV dword ptr [ECX + 0x10]
+    - 00cda6e7  MOV dword ptr [ECX + 0x24]
+    - 00cda705  MOV dword ptr [ECX + 0x30]
+    - 00cda723  MOV dword ptr [ECX + 0x38]
+    - 00cda736  MOV dword ptr [ECX + 0x1c]
+    - 00cdaabc  MOV dword ptr [ECX + 0x20]
+    - 00cdabb3  MOV dword ptr [ECX + 0x18]
+    - 00cdacce  MOV dword ptr [ECX + 0x20]
+    - 00cdae1f  MOV dword ptr [EDX + 0x1c]
+    - 00cdaf62  MOV dword ptr [EAX]
+    - 00cdafaa  MOV byte ptr [ECX + 0x1f]
+    - 00cdafb4  MOV dword ptr [EDX + 0x4]
+    - 00cdafc3  MOV dword ptr [EDX + 0x4]
+    - 00cdb09c  MOV dword ptr [ECX]
+    - 00cdb171  MOV dword ptr [EDX + 0x144]
+    - 00cdb1a7  MOV dword ptr [EDX + 0x148]
+    - 00cdb1dd  MOV dword ptr [ECX + EDX*0x4 + 0x4]
+
+Implementation directive for asset viewer:
+- Do NOT treat these small allocator objects as raw mesh/texture payload.
+- Treat them as graph nodes / descriptors / handles that reference other caches.
+- Build the viewer to follow references/IDs rather than assuming contiguous embedded data.
+- Use the ctor/init callees above as anchors; decompile them and identify:
+  - which fields (offsets) are IDs/handles into cache managers
+  - which fields are pointers to other nodes (including intrusive list linkages)
+  - which functions are subsequently called with those fields (follow the call graph)
+- Primary anchors where intrusive list is confirmed:
+  - FUN_00cd9870 @ 00cd9870 (sizes 0x24 and 0x2c) writes both +0x24 and +0x28
+  - FUN_00ceb650 @ 00ceb650 (size 0x24) writes both +0x24 and +0x28
+  - FUN_00ce1ac0 @ 00ce1ac0 (size 0x28) writes +0x24 and +0x28
+  - FUN_00ce42a0 @ 00ce42a0 (size 0x28) writes +0x24 and +0x28
+  - FUN_00ceb330 @ 00ceb330 (size 0x28) writes +0x24 and +0x28
+
+Stop condition:
+- Once you identify the cache-ID -> cache lookup -> assembled asset pipeline, implement it in the viewer and show actual assembled models.

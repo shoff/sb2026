@@ -5,7 +5,10 @@ Mesh Renderer - Converts ArcMesh to OpenGL buffers and renders meshes.
 from OpenGL.GL import *
 import numpy as np
 from typing import Optional, Tuple
+import os
 from dataclasses import dataclass
+
+from rendering.runtime_render_payload import RuntimeImmediateSubmission
 
 
 @dataclass
@@ -26,6 +29,13 @@ class GPUMesh:
     bounds_max: np.ndarray
     has_uvs: bool
     has_skinning: bool  # Whether mesh has bone skinning data
+
+
+@dataclass(frozen=True)
+class ImmediateRenderRequest:
+    submission: RuntimeImmediateSubmission
+    shader_program: object
+    texture_id: Optional[int] = None
 
 
 class MeshRenderer:
@@ -208,6 +218,76 @@ class MeshRenderer:
         # Unbind texture
         if has_texture:
             glBindTexture(GL_TEXTURE_2D, 0)
+
+    def render_immediate_payload(self, request: ImmediateRenderRequest) -> None:
+        if request.submission is None:
+            return
+
+        trace_enabled = os.getenv("RUNTIME_RENDER_TRACE", "0") == "1"
+        no_draw = os.getenv("RUNTIME_RENDER_NO_DRAW", "0") == "1"
+
+        positions = request.submission.positions.astype(np.float32, copy=False)
+        normals = request.submission.normals.astype(np.float32, copy=False)
+        uvs = request.submission.uvs.astype(np.float32, copy=False)
+
+        if trace_enabled:
+            sample_count = min(3, request.submission.vertex_count)
+            sample_positions = positions[:sample_count].tolist()
+            print(
+                "runtime_submit|verts=%d|prim=GL_TRIANGLE_STRIP|stride_pos=12|stride_norm=12|stride_uv=8|pos_ptr=0x%08x|norm_ptr=0x%08x|uv_ptr=0x%08x"
+                % (
+                    request.submission.vertex_count,
+                    request.submission.payload.positions_ptr,
+                    request.submission.payload.normals_ptr,
+                    request.submission.payload.uvs_ptr,
+                )
+            )
+            print("runtime_submit_positions|count=%d|values=%s" % (sample_count, sample_positions))
+
+        if no_draw:
+            return
+
+        vao = glGenVertexArrays(1)
+        glBindVertexArray(vao)
+
+        vbo_positions = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_positions)
+        glBufferData(GL_ARRAY_BUFFER, positions.nbytes, positions, GL_STATIC_DRAW)
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+
+        vbo_normals = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_normals)
+        glBufferData(GL_ARRAY_BUFFER, normals.nbytes, normals, GL_STATIC_DRAW)
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, None)
+
+        vbo_uvs = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_uvs)
+        glBufferData(GL_ARRAY_BUFFER, uvs.nbytes, uvs, GL_STATIC_DRAW)
+        glEnableVertexAttribArray(2)
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, None)
+
+        request.shader_program.use()
+        has_texture = request.texture_id is not None
+        request.shader_program.set_bool("uHasTexture", has_texture)
+        request.shader_program.set_bool("uUseSkinning", False)
+        if has_texture:
+            glActiveTexture(GL_TEXTURE0)
+            glBindTexture(GL_TEXTURE_2D, request.texture_id)
+            request.shader_program.set_int("uTexture", 0)
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, request.submission.vertex_count)
+
+        glBindVertexArray(0)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        if has_texture:
+            glBindTexture(GL_TEXTURE_2D, 0)
+
+        glDeleteBuffers(1, [vbo_positions])
+        glDeleteBuffers(1, [vbo_normals])
+        glDeleteBuffers(1, [vbo_uvs])
+        glDeleteVertexArrays(1, [vao])
 
     def get_mesh_bounds(self, asset_id: int) -> Optional[Tuple[np.ndarray, np.ndarray]]:
         """

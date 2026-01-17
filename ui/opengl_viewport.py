@@ -7,12 +7,22 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QSurfaceFormat
 from OpenGL.GL import *
 import numpy as np
-from typing import List, Optional
+import os
+from typing import Iterable, List, Optional
 
 from rendering.camera import Camera
 from rendering.shader_manager import ShaderManager
 from rendering.mesh_renderer import MeshRenderer
 from rendering.texture_manager import TextureManager
+from rendering.runtime_render_payload import (
+    ByteMemoryReader,
+    ImmediateSubmissionRequest,
+    MemorySegment,
+    RuntimeImmediateSubmission,
+    RuntimeRenderParser,
+)
+from rendering.mesh_renderer import ImmediateRenderRequest
+from rendering.runtime_dispatch_dump import dump_runtime_dispatch_candidates
 from animation.skeletal_animator import SkeletalAnimator
 from animation.animation_controller import AnimationController
 import time
@@ -55,6 +65,8 @@ class OpenGLViewport(QOpenGLWidget):
         self.current_parts: List[MeshPart] = []
         self._pending_assembled_asset: Optional[AssembledAsset] = None
         self._pending_single_mesh: Optional[tuple[int, Optional[int], Optional[int], Optional[int]]] = None
+        self.current_runtime_submission: Optional[RuntimeImmediateSubmission] = None
+        self.current_segments: List[MemorySegment] = []
 
         # Animation components
         self.skeletal_animator: Optional[SkeletalAnimator] = None
@@ -165,6 +177,14 @@ class OpenGLViewport(QOpenGLWidget):
         shader.set_vec3("uAmbientColor", np.array([0.3, 0.3, 0.3], dtype=np.float32))
         shader.set_vec3("uViewPos", self.camera.get_position())
 
+        if self.current_runtime_submission and self.mesh_renderer:
+            self.mesh_renderer.render_immediate_payload(
+                ImmediateRenderRequest(submission=self.current_runtime_submission, shader_program=shader)
+            )
+            self._render_grid()
+            self.frame_count += 1
+            return
+
         # Render assembled parts (preferred), else fallback to single-mesh mode
         if self.current_parts and self.mesh_renderer:
             bone_matrices = None
@@ -204,6 +224,41 @@ class OpenGLViewport(QOpenGLWidget):
 
         # Update FPS
         self.frame_count += 1
+
+    def load_runtime_dispatch(self, dispatch_address: int, segments: Iterable[MemorySegment]) -> None:
+        if not self.mesh_renderer or not self.camera:
+            return
+
+        self.current_segments = list(segments)
+        reader = ByteMemoryReader(segments)
+        parser = RuntimeRenderParser()
+        submission = parser.parse_immediate_submission(
+            request=ImmediateSubmissionRequest(reader=reader, dispatch_address=dispatch_address)
+        )
+        if submission is None:
+            return
+
+        self.current_runtime_submission = submission
+        self.current_mesh_id = None
+        self.current_texture_id = None
+        self.current_parts = []
+        self.skeletal_animator = None
+        self.animation_controller = None
+        self.update()
+
+    def dump_runtime_dispatches(self) -> None:
+        if not self.current_segments:
+            print("runtime_dump_skipped|reason=no_segments")
+            return
+        output_dir = os.path.join(os.getcwd(), "dumps")
+        paths = dump_runtime_dispatch_candidates(
+            segments=self.current_segments,
+            output_dir=output_dir,
+            max_candidates=25,
+        )
+        print("runtime_dump_written|count=%d" % len(paths))
+        for p in paths[:10]:
+            print("runtime_dump_file|path=%s" % p)
 
     def _render_grid(self):
         """Render a grid on the ground plane for reference."""
@@ -245,6 +300,7 @@ class OpenGLViewport(QOpenGLWidget):
         # Set as current
         self.current_mesh_id = mesh_id
         self.current_texture_id = texture_id
+        self.current_runtime_submission = None
         self.current_parts = [
             MeshPart(
                 mesh_id=mesh_id,
@@ -297,6 +353,7 @@ class OpenGLViewport(QOpenGLWidget):
 
         self.current_mesh_id = None
         self.current_texture_id = None
+        self.current_runtime_submission = None
         self.current_parts = asset.parts
 
         # Disable animation for now (Task C will drive skeleton attachment rules)
@@ -410,6 +467,8 @@ class OpenGLViewport(QOpenGLWidget):
         elif event.key() == Qt.Key.Key_G:
             # Toggle grid (TODO)
             pass
+        elif event.key() == Qt.Key.Key_D and (event.modifiers() & Qt.KeyboardModifier.ControlModifier):
+            self.dump_runtime_dispatches()
 
     def _update_animation(self):
         """Update animation (called by timer)."""

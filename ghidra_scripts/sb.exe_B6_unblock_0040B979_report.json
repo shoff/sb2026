@@ -1,0 +1,23 @@
+{
+  "target":"0x0040B979",
+  "function_before":"thunk_FUN_005b6790 @ 0040b979",
+  "function_after":"thunk_FUN_005b6790 @ 0040b979",
+  "thunk_resolved_to":"005b6790",
+  "code_refs":[],
+  "data_refs":["015498cc"],
+  "known_data_xref":"015498cc",
+  "table_base":"015498a0",
+  "table_entries":39,
+  "table_targets":["0041a195","0041020d","00426f49","00423a47","0041df8e","0041f7da","00421ef4","0040dc97","00415406","00428349","00408f99","0040b979","00405f4c","00410154","00405a8d","00425e00","00402f22","00415feb","00404a16","0041b1b7","004103cf","0042659e","0040d57b","0041f36b","004066db","00420b85","0040fbaf","004114e1","0040817f","0040b17c","0040c6cb","0040844f","00420cd9","00422449","00423547","0040dd0f","00424442","00422e62","00407bb2"],
+  "found_callers":[
+    {"callsite":"005b5bd3","kind":"INDIRECT_CALL","caller_function":"FUN_005b5b00","caller_entry":"005b5b00","details":"near ref 005b5b5f tableBase 015498a0"},
+    {"callsite":"005b5c14","kind":"INDIRECT_CALL","caller_function":"FUN_005b5b00","caller_entry":"005b5b00","details":"near ref 005b5b5f tableBase 015498a0"},
+    {"callsite":"005b5d9b","kind":"INDIRECT_CALL","caller_function":"FUN_005b5d20","caller_entry":"005b5d20","details":"near ref 005b5d69 tableBase 015498a0"},
+    {"callsite":"005b5f41","kind":"INDIRECT_CALL","caller_function":"FUN_005b5e30","caller_entry":"005b5e30","details":"near ref 005b5e81 tableBase 015498a0"},
+    {"callsite":"005b5f41","kind":"INDIRECT_CALL","caller_function":"FUN_005b5ef0","caller_entry":"005b5ef0","details":"near ref 005b5f10 tableBase 015498a0"},
+    {"callsite":"005b5ffb","kind":"INDIRECT_CALL","caller_function":"FUN_005b5ef0","caller_entry":"005b5ef0","details":"near ref 005b5f10 tableBase 015498a0"},
+    {"callsite":"005b70e0","kind":"INDIRECT_CALL","caller_function":"FUN_005b6fe0","caller_entry":"005b6fe0","details":"near ref 005b7031 tableBase 015498a0"}
+  ],
+  "actions":["Thunk-like first ins at 0040b979 is JMP -> 005b6790","Expanded pointer-table base from 015498cc back to 015498a0","Scanned pointer table at 015498a0 entries=39"],
+  "warnings":[]
+}

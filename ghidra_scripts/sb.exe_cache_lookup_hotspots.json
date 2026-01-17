@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-01-14 22:59:53",
+  "input": "sb.exe_obj_field_usage_call_target_rank.json",
+  "targetsAnalyzed": 0,
+  "calleeCandidates": 0,
+  "targets": [
+  ],
+  "rankedCallees": [
+  ]
+}

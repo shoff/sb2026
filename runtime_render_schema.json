@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "source_artifacts": {
+    "renderpayload_offsets": "ghidra_scripts/sb_aadc0_renderpayload_offsets.json",
+    "dispatch_ctor_writes": "ghidra_scripts/sb_immediate_dispatch_ctor_writes.json",
+    "vcall_slot28_callsites": "ghidra_scripts/sb_vcall_slot28_callsites.json"
+  },
+  "dispatch_object": {
+    "type_name": "Unnamed Immediate Render Dispatch Object",
+    "vtable": "0x015498A0",
+    "fields": [
+      {
+        "offset": "0x10",
+        "name": "immediate_enabled",
+        "type": "u8",
+        "role": "gate_flag",
+        "evidence": [
+          "FUN_005b6790 checks *(this+0x10) != 0 before calling FUN_005aadc0"
+        ]
+      },
+      {
+        "offset": "0x11",
+        "name": "immediate_arg",
+        "type": "u8",
+        "role": "vertex_count_selector",
+        "evidence": [
+          "FUN_005b6790 passes *(this+0x11) as param_1 to FUN_005aadc0"
+        ]
+      },
+      {
+        "offset": "0x14",
+        "name": "render_payload_ptr",
+        "type": "ptr32",
+        "role": "render_payload",
+        "evidence": [
+          "FUN_005b6790 passes *(this+0x14) as this_00 into FUN_005aadc0"
+        ]
+      }
+    ],
+    "constructor_sites": [
+      "0x005b5b5f",
+      "0x005b5d69",
+      "0x005b5e81",
+      "0x005b7031"
+    ]
+  },
+  "render_payload": {
+    "type_name": "RenderPayload",
+    "field_map": [
+      {
+        "offset": "0x64",
+        "access_size": 4,
+        "access_type": "LOAD",
+        "confidence": "HIGH",
+        "category": "pointer",
+        "name": "positions_ptr",
+        "meaning": "float3 position array base",
+        "evidence": [
+          "005aae05 MOV ECX,[ESI+0x64]",
+          "005aae08/005aae0c/005aae13/005aae15 feed glVertex3f"
+        ]
+      },
+      {
+        "offset": "0x70",
+        "access_size": 4,
+        "access_type": "LOAD",
+        "confidence": "HIGH",
+        "category": "pointer",
+        "name": "uvs_ptr",
+        "meaning": "float2 uv array base",
+        "evidence": [
+          "005aadf1 MOV ECX,[ESI+0x70]",
+          "005aadf4/005aadfb/005aadff feed glTexCoord2f"
+        ]
+      },
+      {
+        "offset": "0x7C",
+        "access_size": 4,
+        "access_type": "LOAD",
+        "confidence": "HIGH",
+        "category": "pointer",
+        "name": "normals_ptr",
+        "meaning": "float3 normal array base",
+        "evidence": [
+          "005aaddb MOV EAX,[ESI+0x7c]",
+          "005aade0/005aade6/005aadeb feed glNormal3f"
+        ]
+      }
+    ],
+    "immediate_mode": {
+      "primitive": "GL_TRIANGLE_STRIP",
+      "primitive_evidence": [
+        "005aadc8 PUSH 0x5",
+        "005aadca CALL glBegin"
+      ],
+      "vertex_count": {
+        "param_1_nonzero": 8,
+        "param_1_zero": 4
+      },
+      "loop_evidence": [
+        "005aae23 CMP EDI,0x40",
+        "005aae88 CMP EDI,0x20"
+      ]
+    },
+    "notes": [
+      "sb_aadc0_renderpayload_offsets.json contains no offset uses; layout is derived from FUN_005aadc0 disassembly"
+    ]
+  },
+  "call_chain": [
+    "slot+0x28",
+    "FUN_005b6760",
+    "FUN_005b6790",
+    "FUN_005aadc0"
+  ],
+  "fun_005aadc0_calls": [
+    "glBegin",
+    "glNormal3f",
+    "glTexCoord2f",
+    "glVertex3f",
+    "glEnd"
+  ]
+}
